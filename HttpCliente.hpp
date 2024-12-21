@@ -7,6 +7,9 @@
 
 class HttpCliente
 {
+public:
+    HttpCliente(std::vector<wifiAP> AccessPoints) : accessPoints(AccessPoints) {}
+    void getLocationResponse();
 private:
     std::vector<wifiAP> accessPoints;
     struct Memory
@@ -14,15 +17,10 @@ private:
         char *Memory;
         size_t size;
     };
-
     void showLocation(char *response);
     static size_t allocateMemory(void *content, size_t size, size_t nmeb, void *userp);
-
-public:
-    HttpCliente(std::vector<wifiAP> AccessPoints) : accessPoints(AccessPoints) {}
-    ~HttpCliente();
-    void getLocationResponse();
     char *buildRequest();
+
 };
 
 void HttpCliente::showLocation(char *response)
