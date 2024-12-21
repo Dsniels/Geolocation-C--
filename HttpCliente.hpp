@@ -15,6 +15,7 @@ private:
         size_t size;
     };
 
+    void showLocation(char *response);
     static size_t allocateMemory(void *content, size_t size, size_t nmeb, void *userp);
 
 public:
@@ -22,8 +23,39 @@ public:
     ~HttpCliente();
     void getLocationResponse();
     char *buildRequest();
-    void showLocation();
 };
+
+void HttpCliente::showLocation(char *response)
+{
+
+    const cJSON *location = NULL;
+    const cJSON *latitude = NULL;
+    const cJSON *longitude = NULL;
+    const cJSON *accuracy = NULL;
+
+    cJSON *parseJSON = cJSON_Parse(response);
+
+    if (!parseJSON)
+    {
+        const char *err = cJSON_GetErrorPtr();
+        std::cerr << "Error: " << cJSON_GetErrorPtr() << std::endl;
+        goto end;
+    }
+
+    location = cJSON_GetObjectItemCaseSensitive(parseJSON, "location");
+    latitude = cJSON_GetObjectItemCaseSensitive(location, "lat");
+    longitude = cJSON_GetObjectItemCaseSensitive(location, "lng");
+    accuracy = cJSON_GetObjectItemCaseSensitive(parseJSON, "accuracy");
+    if (location && longitude && latitude && accuracy)
+    {
+        std::cout << std::endl
+                  << "You are in " << cJSON_Print(latitude) << "N " << cJSON_Print(longitude) << "E" << std::endl
+                  << "within " << cJSON_Print(accuracy) << ' m' << std::endl;
+    }
+
+end:
+    cJSON_Delete(parseJSON);
+}
 
 char *HttpCliente::buildRequest()
 {
@@ -62,6 +94,7 @@ end:
 
     return outputJson;
 }
+
 size_t HttpCliente::allocateMemory(void *content, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
@@ -110,7 +143,7 @@ void HttpCliente::getLocationResponse()
 
     if (response == CURLE_OK)
     {
-        showLocation();
+        showLocation(chunk.Memory);
     }
     else
     {
@@ -122,8 +155,5 @@ void HttpCliente::getLocationResponse()
     free(chunk.Memory);
 }
 
-HttpCliente::~HttpCliente()
-{
-}
 
 #endif
