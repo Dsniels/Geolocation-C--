@@ -15,7 +15,7 @@ private:
         size_t size;
     };
 
-    static size_t allocateMemory(void *content, size_t size, size_t nmeb);
+    static size_t allocateMemory(void *content, size_t size, size_t nmeb, void *userp);
 
 public:
     HttpCliente(std::vector<wifiAP> AccessPoints) : accessPoints(AccessPoints) {}
@@ -62,7 +62,24 @@ end:
 
     return outputJson;
 }
-size_t HttpCliente::allocateMemory(void *content, size_t size, size_t nmeb){
+size_t HttpCliente::allocateMemory(void *content, size_t size, size_t nmemb, void *userp){
+    size_t realsize = size *nmemb;
+    struct Memory *mem = (struct Memory *)userp;
+
+    char *ptr = (char *)realloc(mem->Memory, mem->size + realsize +1);
+
+    if(!ptr){
+        std::cerr<<"Error: allocateMemory failed"<<std::endl;
+        return 1;
+    }
+
+    mem->Memory = ptr;
+    memcpy(&(mem->Memory[mem->size]), content, realsize);
+    mem->size += realsize;
+    mem->Memory[mem->size] = 0;
+
+
+    return realsize;
 
 }
 
@@ -92,7 +109,7 @@ void HttpCliente::getLocationResponse()
     //perform the request and get a response code
     CURLcode response = curl_easy_perform(curl);
 
-    
+
 
 
 }
