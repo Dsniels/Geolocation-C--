@@ -62,7 +62,10 @@ end:
 
     return outputJson;
 }
-static size_t HttpCliente::CallocateMemory(void *content, size_t size, size_t nmeb);
+size_t HttpCliente::allocateMemory(void *content, size_t size, size_t nmeb){
+
+}
+
 
 void HttpCliente::getLocationResponse()
 {
@@ -85,6 +88,13 @@ void HttpCliente::getLocationResponse()
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyPayload);
     // curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, );
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+    //perform the request and get a response code
+    CURLcode response = curl_easy_perform(curl);
+
+    
+
+
 }
 
 HttpCliente::~HttpCliente()
