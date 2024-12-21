@@ -1,4 +1,8 @@
 #include "WifiPoints.hpp"
+#include "cJSON.h"
+#include <curl/curl.h>
+
+
 
 bool WifiPoints::initializeWlanHandle(HANDLE& hClient, DWORD& dwCurVersion) {
     DWORD dwResult = WlanOpenHandle(2, NULL, &dwCurVersion, &hClient);
@@ -25,6 +29,7 @@ void WifiPoints::processAccessPoint(PWLAN_BSS_ENTRY pBssEntry) {
     std::cout << accessPoint.signalStrength << std::endl;
     wifiAPList.push_back(accessPoint);
 }
+
 
 bool WifiPoints::processBssInfo(HANDLE hClient, PWLAN_INTERFACE_INFO pIfInfo) {
     PWLAN_BSS_LIST pBssList = NULL;
@@ -75,7 +80,3 @@ int WifiPoints::getWifiNetworks() {
     return 0;
 }
 
-int main() {
-    WifiPoints GWP;
-    return GWP.getWifiNetworks();
-}
