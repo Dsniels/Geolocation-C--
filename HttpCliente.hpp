@@ -62,14 +62,16 @@ end:
 
     return outputJson;
 }
-size_t HttpCliente::allocateMemory(void *content, size_t size, size_t nmemb, void *userp){
-    size_t realsize = size *nmemb;
+size_t HttpCliente::allocateMemory(void *content, size_t size, size_t nmemb, void *userp)
+{
+    size_t realsize = size * nmemb;
     struct Memory *mem = (struct Memory *)userp;
 
-    char *ptr = (char *)realloc(mem->Memory, mem->size + realsize +1);
+    char *ptr = (char *)realloc(mem->Memory, mem->size + realsize + 1);
 
-    if(!ptr){
-        std::cerr<<"Error: allocateMemory failed"<<std::endl;
+    if (!ptr)
+    {
+        std::cerr << "Error: allocateMemory failed" << std::endl;
         return 1;
     }
 
@@ -78,11 +80,8 @@ size_t HttpCliente::allocateMemory(void *content, size_t size, size_t nmemb, voi
     mem->size += realsize;
     mem->Memory[mem->size] = 0;
 
-
     return realsize;
-
 }
-
 
 void HttpCliente::getLocationResponse()
 {
@@ -103,15 +102,24 @@ void HttpCliente::getLocationResponse()
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyPayload);
-    // curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, );
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, allocateMemory);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
-    //perform the request and get a response code
+    // perform the request and get a response code
     CURLcode response = curl_easy_perform(curl);
 
+    if (response == CURLE_OK)
+    {
+        showLocation();
+    }
+    else
+    {
+        std::cerr << "Error: curl_perform failed " << std::endl;
+    }
 
-
-
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    free(chunk.Memory);
 }
 
 HttpCliente::~HttpCliente()
